@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+    </head>
+    <body>
+        <h1>aMAZEing</h1>
+        <canvas width="200" height="200"></canvas>
+
+        <script type="text/javascript" src="js/lib/jquery.min.js"></script>
+        <script type="text/javascript" src="js/lib/underscore-min.js"></script>
+        <script type="text/javascript" src="js/lib/backbone-min.js"></script>
+
+        <script type="text/javascript" src="js/models/Maze.js"></script>
+        <script type="text/javascript" src="js/models/Cell.js"></script>
+        <script type="text/javascript" src="js/collections/Cells.js"></script>
+        <script type="text/javascript" src="js/views/MazeView.js"></script>
+
+        <script type="text/javascript">
+            var maze;
+            var mazeView
+            $(document).ready(function () {
+                maze = new Maze({
+                    rows:20,
+                    cols:20
+                });
+                mazeView = new MazeView({
+                    model:maze,
+                    size:10,
+                    border:2
+                });
+            });
+        </script>
+    </body>
+</html>
