@@ -1,0 +1,236 @@
+<!doctype html>
+
+<html>
+    <head>
+        <title>a-MAZE-ing</title>
+    </head>
+    <body>
+        <div id="maze"></div>
+
+        <script type="text/javascript">
+            var Cell = function (r, c) {
+                var me=this;
+                this.r = r;
+                this.c = c;
+                this.walls = {
+                    n:true,
+                    e:true,
+                    s:true,
+                    w:true
+                },
+                        this.visited = false;
+                this.solution = {
+                    n:false,
+                    e:false,
+                    s:false,
+                    w:false
+                }
+                this.checking=false;
+                this.isSolution = function () {
+                    return me.solution.n || me.solution.e || me.solution.s || me.solution.w;
+                }
+            }
+
+            var DELAY=20;
+            var ROWS = 10;
+            var COLS = 20;
+            var SIZE = 10;
+            var BORDER = 2;
+            var maze = [];
+            var c = 0;
+            var r = 0;
+            var UNVISITED = {};
+
+            var directions = {
+                "n":[-1, 0],
+                "e":[0, 1],
+                "s":[1, 0],
+                "w":[0, -1]
+            };
+
+            var oposite = {
+                "n":"s",
+                "e":"w",
+                "s":"n",
+                "w":"e"
+            }
+
+
+            for (r = 0; r < ROWS; r++) {
+                maze[r] = [];
+                for (c = 0; c < COLS; c++) {
+                    maze[r][c] = new Cell(r, c);
+                    UNVISITED[r+"|"+c]=maze[r][c];
+                }
+            }
+
+            function renderCell(c) {
+                ctx.fillStyle = "black";
+                ctx.beginPath();
+                ctx.rect(cToPx(c.c), cToPx(c.r), SIZE, SIZE);
+                ctx.fill();
+                return;
+
+                if (c.visited) {
+
+                    ctx.fillStyle = "white";
+                    ctx.beginPath();
+                    ctx.rect(cToPx(c.c), cToPx(c.r), SIZE, SIZE);
+                    ctx.fill();
+
+                    ctx.fillStyle = "black";
+                    if (c.walls.n) {
+                        //ctx.fillStyle = "red";
+                        ctx.beginPath();
+                        ctx.rect(cToPx(c.c), cToPx(c.r), SIZE, BORDER);
+                        ctx.fill();
+                    }
+
+                    if (c.walls.e) {
+                        //ctx.fillStyle = "green";
+                        ctx.beginPath();
+                        ctx.rect(cToPx(c.c + 1) - BORDER, cToPx(c.r), BORDER, SIZE);
+                        ctx.fill();
+                    }
+
+                    if (c.walls.s) {
+                        //ctx.fillStyle = "blue";
+                        ctx.beginPath();
+                        ctx.rect(cToPx(c.c) - BORDER, cToPx(c.r + 1), SIZE, BORDER);
+                        ctx.fill();
+                    }
+
+                    if (c.walls.w) {
+                        //ctx.fillStyle = "yellow";
+                        ctx.beginPath();
+                        ctx.rect(cToPx(c.c), cToPx(c.r), BORDER, SIZE);
+                        ctx.fill();
+                    }
+                }
+
+                if (c.isSolution()) {
+                    ctx.fillStyle = "yellow";
+                    ctx.beginPath();
+                    ctx.rect(cToPx(c.c)+2, cToPx(c.r)+2, SIZE-4, SIZE-4);
+                    ctx.fill();
+                }
+
+            }
+            ;
+
+            var ctx;
+
+            function cToPx(x) {
+                return SIZE * x;
+            }
+
+            var canvas = document.createElement("canvas");
+            canvas.width = COLS * SIZE + 1;
+            canvas.height = ROWS * SIZE + 1;
+            document.getElementById("maze").innerHTML = "";
+            document.getElementById("maze").appendChild(canvas);
+            ctx = canvas.getContext("2d")
+
+            function renderMaze(maze) {
+
+                for (r = 0; r < ROWS; r++) {
+                    for (c = 0; c < COLS; c++) {
+                        renderCell(maze[r][c]);
+                    }
+                }
+            }
+
+            function digMaze(c,level,cb) {
+                c.visited = true;
+                delete UNVISITED[c.r+"|"+ c.c];
+                var neighbours = [];
+
+                if (Object.keys(UNVISITED).length > 0) {
+
+                    for (d in directions) {
+                        var ri = c.r + directions[d][0];
+                        var ci = c.c + directions[d][1];
+
+                        if ((ri >= 0) && (ri < ROWS) && (ci >= 0) && (ci < COLS)) {
+                            var n = maze[ri][ci];
+                            if (!n.visited) {
+                                neighbours.push({"d":d, "n":n});
+                            }
+                        }
+                    }
+                    //console.log(neighbours);
+
+                    if (neighbours.length > 0) {
+                        var z = rand(neighbours.length);
+                        //console.log(z);
+                        var t = neighbours[z];
+                        c.walls[t.d] = false;
+                        //make next cells incoming wall false
+                        t.n.walls[oposite[t.d]] = false;
+                        renderCell(c);
+                        setTimeout(function(){digMaze(t.n,level++,function() {
+                            digMaze(c,level++,function() {
+                                //console.log("Done "+level);
+                            });
+                        });},DELAY);
+                    }
+                }
+                cb();
+            }
+
+            digMaze(maze[0][0],0);
+            //renderMaze(maze);
+            //solveMaze();
+
+            function solveMaze() {
+                backtrack(maze[0][0],0);
+            }
+
+            function backtrack(c,level) {
+                console.log("Bin jetzt",c.r,c.c);
+                if (level>2) {
+                    console.log("too deep");
+                    return false;
+                }
+                if (c.checking) {
+                    console.log("War ich schon");
+                    return false;
+                }
+                c.checking=true;
+                if ((c.r==ROWS-1) && (c.c==COLS-1)) {
+                    console.log("FOUND SOLUTION");
+                    return true;
+                }
+                var couldBeSolution=["n","e","s","w"];
+                while (!c.isSolution() && couldBeSolution.length>0) {
+                    var d=couldBeSolution.shift();
+
+                    if (c.walls[d]) {
+                        console.log("Mauer im "+d);
+                    } else {
+                        var ri = c.r + directions[d][0];
+                        var ci = c.c + directions[d][1];
+
+                        if ((ri >= 0) && (ri < ROWS) && (ci >= 0) && (ci < COLS)) {
+                            var n = maze[ri][ci];
+
+                            if (n.checking) {
+                                console.log(ri,ci," war ich schon");
+                            } else {
+                                setTimeout(function(){c.solution[d]=backtrack(n,level++);},DELAY);
+                            }
+                            renderCell(c);
+                        }
+                    }
+                }
+                return c.isSolution();
+            }
+
+            function rand(num) {
+                return Math.floor(Math.random() * (num))
+            }
+
+        </script>
+    </body>
+</html>
+
