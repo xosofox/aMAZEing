@@ -84,5 +84,23 @@ test("Maze neighbours", function () {
 	console.log(r0," vs ",r1);
 	ok(r0>470,"getRandomUnvistedNeighbourOf returns good randomness with "+r0+">470");
 	ok(r0<530,"getRandomUnvistedNeighbourOf returns good randomness with "+r1+"<530");
+});
+
+test("MazeView",function() {
+	var maze= new Maze({
+		rows: 2,
+		cols: 4
+	});
+	var mazeview = new MazeView({
+		model: maze,
+		size: 5,
+		outerBorder: 4,
+		border: 2
+	});
+	equal(mazeview.rowToY(0),4,"rowToY returns left edge of cell");
+	equal(mazeview.rowToY(1),9,"rowToY works correctly");
+	equal(mazeview.options.width,28,"mazeview width correctly initialized");
+	equal(mazeview.options.height,18,"mazeview height correctly initialized");
+
 
 });

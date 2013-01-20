@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title></title>
+        <title>aMAZEing</title>
     </head>
     <body>
         <h1>aMAZEing</h1>
-        <canvas width="200" height="200"></canvas>
+
+        <div id="mazecontainer">
+            <canvas id="mazeview" width="200" height="200"></canvas>
+        </div>
 
         <script type="text/javascript" src="js/lib/jquery.min.js"></script>
         <script type="text/javascript" src="js/lib/underscore-min.js"></script>
@@ -21,14 +24,33 @@
             var mazeView
             $(document).ready(function () {
                 maze = new Maze({
-                    rows:20,
-                    cols:20
+                    rows:5,
+                    cols:5
                 });
+                maze.setStart([0,0]);
+                maze.setExit([4,4]);
+                maze.grid[1][1].set({visited:true});
+                maze.grid[2][1].set({visited:true});
+                maze.grid[3][1].set({visited:true});
+                maze.grid[1][2].set({visited:true});
+
+                var walls=maze.grid[1][2].get("walls");
+                walls[2]=false;
+                var walls=maze.grid[2][2].get("walls");
+                walls[0]=false;
+
+                maze.grid[2][2].set({visited:true});
+                maze.grid[3][2].set({visited:true});
                 mazeView = new MazeView({
+                    el: '#mazeview',
                     model:maze,
                     size:10,
-                    border:2
+                    border:1,
+                    zoom: 8,
+                    bgColorStyle: "black",
+                    fgColorStyle: "pink"
                 });
+                mazeView.render();
             });
         </script>
     </body>

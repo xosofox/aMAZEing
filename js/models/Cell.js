@@ -9,7 +9,9 @@ var Cell = Backbone.Model.extend({
 	defaults: {
 		visited: false,
 		walls: [],
-		coords: []
+		coords: [],
+		start: false,
+		exit: false
 	},
 	initialize: function(maze,coords) {
 		//parent maze

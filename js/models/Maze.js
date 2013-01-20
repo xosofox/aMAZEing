@@ -16,7 +16,8 @@ var Maze = Backbone.Model.extend({
 			[0, 1],
 			[1, 0],
 			[0, -1]
-		]
+		],
+		"startCoords":[0,0]
 	},
 	events:{
 		"change rows cols":"reset"
@@ -49,6 +50,14 @@ var Maze = Backbone.Model.extend({
 		var directions = this.get("directions");
 		var d = directions[direction];
 		return [coords[0] + d[0], coords[1] + d[1]];
+	},
+	setStart:function(coords) {
+		this.set("startCoords",coords);
+		this.getCell(coords).set({"start":true,"visited":true});
+	},
+	setExit:function(coords) {
+		this.set("exitCoords",coords);
+		this.getCell(coords).set({"exit":true,"visited":true});
 	},
 	setVisited: function(coords) {
 		this.getCell(coords).set("visited",true);
@@ -94,4 +103,5 @@ var Maze = Backbone.Model.extend({
 	getRandomUnvisitedNeighbourOf: function(coords) {
 		return _.first(this.getUnvisitedNeighboursOf(coords).shuffle());
 	}
+
 });
