@@ -101,6 +101,19 @@ test("MazeView",function() {
 	equal(mazeview.rowToY(1),9,"rowToY works correctly");
 	equal(mazeview.options.width,28,"mazeview width correctly initialized");
 	equal(mazeview.options.height,18,"mazeview height correctly initialized");
-
-
 });
+
+test("Algorithms",function() {
+	var maze=new Maze({
+		rows:20,
+		cols:10
+	});
+	equal(maze.oppositeDirection(1),3,"oppositedirection of 1 is 3");
+	equal(maze.oppositeDirection(3),1,"oppositedirection of 3 is 1");
+	equal(maze.oppositeDirection(2),0,"oppositedirection of 2 is 0");
+	equal(maze.getCell([1,1]).get("walls")[1],true,"there is a wall in the east");
+	equal(maze.getCell([1,2]).get("walls")[3],true,"there is a wall in the west");
+	maze.MrGorbachevTearDownThisWall([1,1],1);
+	equal(maze.getCell([1,1]).get("walls")[1],false,"the wall in the east has been taken down");
+	equal(maze.getCell([1,2]).get("walls")[3],false,"the wall in the west has been taken down");
+})

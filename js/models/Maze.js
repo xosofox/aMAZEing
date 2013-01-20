@@ -102,6 +102,22 @@ var Maze = Backbone.Model.extend({
 	},
 	getRandomUnvisitedNeighbourOf: function(coords) {
 		return _.first(this.getUnvisitedNeighboursOf(coords).shuffle());
+	},
+	oppositeDirection:function(d) {
+		var nb=this.get("nbOfNeighbours");
+		return (nb/2 + d) % nb;
+	},
+	MrGorbachevTearDownThisWall:function(coords,direction) {
+		var c=this.getCell(coords);
+		if (c) {
+			c.get("walls")[direction]=false;
+		}
+		var n=this.getNeighbourOf(coords,direction);
+		if (n) {
+			n.get("walls")[this.oppositeDirection(direction)]=false;
+		}
+	},
+	digMaze:function(coords) {
+		var c=this.getCell(coords);
 	}
-
 });
