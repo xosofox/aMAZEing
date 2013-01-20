@@ -50,6 +50,9 @@ var Maze = Backbone.Model.extend({
 		var d = directions[direction];
 		return [coords[0] + d[0], coords[1] + d[1]];
 	},
+	setVisited: function(coords) {
+		this.getCell(coords).set("visited",true);
+	},
 	getCell:function (coords) {
 		if ((coords[0] < 0) || (coords[1] < 0)) {
 			return false;
@@ -66,5 +69,29 @@ var Maze = Backbone.Model.extend({
 	getNeighbourOf:function (coords, direction) {
 		var newCoords = this.applyDirectionOnCoords(coords, direction);
 		return this.getCell(newCoords);
+	},
+	/**
+	 *
+	 * Returns all valid neighbours of cell
+	 * @param coords
+	 * @return {Cells}
+	 */
+	getNeighboursOf: function(coords) {
+		var ns=[];
+		for (var d in this.get("directions")) {
+			newCoords = this.applyDirectionOnCoords(coords,d);
+			var c=this.getCell(newCoords);
+			if (c) {
+				ns.push(c);
+			}
+		}
+		return new Cells(ns);
+	},
+
+	getUnvisitedNeighboursOf: function(coords) {
+		return new Cells(this.getNeighboursOf(coords).where({"visited": false}));
+	},
+	getRandomUnvisitedNeighbourOf: function(coords) {
+		return _.first(this.getUnvisitedNeighboursOf(coords).shuffle());
 	}
 });
