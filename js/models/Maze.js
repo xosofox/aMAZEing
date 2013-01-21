@@ -164,13 +164,23 @@ var Maze = Backbone.Model.extend({
             var coords=cs[l-1];
             var c=this.getCell(coords);
             c.set("visited",true);
-            var d;
-            d=this.getRandomValidUnvisitedDirectionOf(coords);
+            var ds=this.getValidUnvisitedDirectionsOf(coords);
+            var d=false;
+            if (ds.length>1) {
+                d=_.first(_.shuffle(ds));
+            } else if (ds.length==1) {
+                d=ds[0];
+            }
 		    if (d!==false) {
                 this.MrGorbachevTearDownThisWall(coords,d)
                 var newCoords=this.applyDirectionOnCoords(coords,d);
+                if (ds.length<=1) {
+                    //remove myself, I'm done now, no need to stay on stack
+                    cs.pop();
+                }
                 cs.push(newCoords);
             } else {
+                //remove myself, I'm done, no need to stay on stack
                 cs.pop();
             }
             this.trigger("cell:changed",coords);
