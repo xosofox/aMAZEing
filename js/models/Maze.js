@@ -154,6 +154,7 @@ var Maze = Backbone.Model.extend({
 		var me=this;
 		var c=this.getCell(coords);
 		c.set("visited",true);
+        this.trigger("cell:changed",coords);
 		var d;
 		d=this.getRandomValidUnvisitedDirectionOf(coords);
 		while (d!==false) {
@@ -162,5 +163,6 @@ var Maze = Backbone.Model.extend({
 			me.digMaze(newCoords);
 			d=this.getRandomValidUnvisitedDirectionOf(coords);
 		}
+        this.trigger("cell:changed",coords);
 	}
 });

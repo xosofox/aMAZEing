@@ -22,25 +22,25 @@
             var maze;
             var mazeView
             $(document).ready(function () {
-                var ROWS=20;
-                var COLS=20;
+                var ROWS=40;
+                var COLS=40;
                 maze = new Maze({
                     rows:ROWS,
                     cols:COLS
                 });
-                maze.setStart([0,0]);
-                maze.setExit([ROWS-1,COLS-1]);
-                maze.digMaze([0,0])
                 mazeView = new MazeView({
                     el: '#mazeview',
                     model:maze,
                     size:10,
                     border:1,
-                    zoom: 4,
+                    zoom: 1,
                     bgColorStyle: "black",
                     fgColorStyle: "pink"
                 });
                 mazeView.render();
+                maze.setStart([0,0]);
+                maze.setExit([ROWS-1,COLS-1]);
+                maze.digMaze([0,0])
             });
         </script>
     </body>

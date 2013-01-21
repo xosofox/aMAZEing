@@ -22,17 +22,11 @@ var MazeView = Backbone.View.extend({
 		this.el.height=this.options.height;
 		this.el.style.width=this.options.width*this.options.zoom+"px";
 		this.el.style.height=this.options.height*this.options.zoom+"px";
+        this.listenTo(this.model,"cell:changed",this.renderCell);
 	},
 	render:function () {
 		this.ctx = this.el.getContext("2d");
 		this.fillBg();
-		var rows=this.model.get("rows");
-		var cols=this.model.get("cols");
-		for (var r=0;r<rows;r++) {
-			for (var c=0;c<cols;c++) {
-				this.renderCell([r,c]);
-			}
-		}
 	},
 	fillBg:function() {
 		this.ctx.fillStyle = this.options.bgColorStyle;
