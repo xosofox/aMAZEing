@@ -57,12 +57,12 @@ var Maze = Backbone.Model.extend({
 	},
 	setExit:function(coords) {
 		this.set("exitCoords",coords);
-		this.getCell(coords).set({"exit":true,"visited":true});
+		this.getCell(coords).set({"exit":true});
 	},
 	setVisited: function(coords) {
 		this.getCell(coords).set("visited",true);
 	},
-	getCell:function (coords) {
+	validCoords:function(coords) {
 		if ((coords[0] < 0) || (coords[1] < 0)) {
 			return false;
 		}
@@ -73,7 +73,14 @@ var Maze = Backbone.Model.extend({
 		if (coords[1] > this.get("cols") - 1) {
 			return false;
 		}
-		return this.grid[coords[0]][coords[1]];
+		return true;
+	},
+	getCell:function (coords) {
+		if (this.validCoords(coords)) {
+			return this.grid[coords[0]][coords[1]];
+		} else {
+			return false;
+		}
 	},
 	getNeighbourOf:function (coords, direction) {
 		var newCoords = this.applyDirectionOnCoords(coords, direction);
@@ -86,22 +93,48 @@ var Maze = Backbone.Model.extend({
 	 * @return {Cells}
 	 */
 	getNeighboursOf: function(coords) {
+		console.error("Obsolete");
 		var ns=[];
 		for (var d in this.get("directions")) {
-			newCoords = this.applyDirectionOnCoords(coords,d);
+			var newCoords = this.applyDirectionOnCoords(coords,d);
 			var c=this.getCell(newCoords);
 			if (c) {
-				ns.push(c);
+				ns[d]=c;
 			}
 		}
 		return new Cells(ns);
 	},
-
-	getUnvisitedNeighboursOf: function(coords) {
-		return new Cells(this.getNeighboursOf(coords).where({"visited": false}));
+	getValidDirectionsOf: function(coords) {
+		var nb=this.get("nbOfNeighbours");
+		var ds=[];
+		for (var d=0;d<nb;d++) {
+			if (this.validCoords(this.applyDirectionOnCoords(coords,d))) {
+				ds.push(d);
+			}
+		}
+		return ds;
 	},
-	getRandomUnvisitedNeighbourOf: function(coords) {
-		return _.first(this.getUnvisitedNeighboursOf(coords).shuffle());
+	getValidUnvisitedDirectionsOf:function(coords) {
+		var ds=this.getValidDirectionsOf(coords);
+		var us=[];
+		for (var i=0;i<ds.length;i++) {
+			var d=ds[i];
+			var c=this.getCell(this.applyDirectionOnCoords(coords,d));
+			if (c) {
+				if (!(c.get("visited"))) {
+					us.push(parseInt(d));
+				}
+			}
+		}
+		return us;
+	},
+	getRandomValidUnvisitedDirectionOf:function(coords){
+		var v=this.getValidUnvisitedDirectionsOf(coords);
+		if (v.length>0) {
+			return _.first(_.shuffle(v));
+		} else {
+			return false;
+		}
 	},
 	oppositeDirection:function(d) {
 		var nb=this.get("nbOfNeighbours");
@@ -118,6 +151,16 @@ var Maze = Backbone.Model.extend({
 		}
 	},
 	digMaze:function(coords) {
+		var me=this;
 		var c=this.getCell(coords);
+		c.set("visited",true);
+		var d;
+		d=this.getRandomValidUnvisitedDirectionOf(coords);
+		while (d!==false) {
+			this.MrGorbachevTearDownThisWall(coords,d)
+			var newCoords=this.applyDirectionOnCoords(coords,d);
+			me.digMaze(newCoords);
+			d=this.getRandomValidUnvisitedDirectionOf(coords);
+		}
 	}
 });

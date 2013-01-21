@@ -51,39 +51,50 @@ test("Maze neighbours", function () {
 	deepEqual(maze.getNeighbourOf([0,0],1).get("coords"),[0,1],"getNeighbourOf returns neighbour of given direction");
 	equal(maze.getNeighbourOf([0,0],3),false,"non existing neighbour returns false");
 
-	var ns;
-	ns=maze.getNeighboursOf([3,0]);
-	equal(ns.size(),3,"getNeighboursOf at the edge returns 3");
+	var ds;
+	ds=maze.getValidDirectionsOf([3,0]);
+	equal(ds.length,3,"getValidDirectionsOf at the edge returns 3");
 
-	ns=maze.getNeighboursOf([7,7]);
-	equal(ns.size(),2,"getNeighboursOf at bottom right corner returns 2");
-	deepEqual(ns.at(0).get("coords"),[6,7],"returns north element first");
+	ds=maze.getValidDirectionsOf([7,7]);
+	equal(ds.length,2,"getValidDirectionsOf at the edge returns 2");
+	equal(ds[0],0,"returns north element first");
 
-	ns=maze.getUnvisitedNeighboursOf([3,0]);
-	equal(ns.size(),3,"getUnvisitedNeighboursOf at the edge returns 3 if none visited");
+	ds=maze.getValidDirectionsOf([2,7]);
+	equal(ds.length,3,"getValidDirectionsOf at the edge returns 3");
+
+	ds=maze.getValidUnvisitedDirectionsOf([3,0]);
+	equal(ds.length,3,"getValidUnvisitedDirectionsOf at the edge returns 3 if none visited");
+
+	ds=maze.getValidUnvisitedDirectionsOf([0,0]);
+	equal(ds.length,2,"getValidUnvisitedDirectionsOf at the top left returns 2 if none visited");
 
 	maze.setVisited([2,0]);
 
-	var ns=maze.getUnvisitedNeighboursOf([3,0]);
-	equal(ns.size(),2,"getUnvisitedNeighboursOf at the edge returns 2 as one is visited");
-	deepEqual(ns.at(0).get("coords"),[3,1],"returns east as north is visited");
+	ds=maze.getValidUnvisitedDirectionsOf([3,0]);
+	equal(ds.length,2,"getValidUnvisitedDirectionsOf at the edge returns 2 as one is visited");
+	deepEqual(ds[0],1,"returns east as north is visited");
 
 	//check randomneess in 100 runs
-	//will return [3,1] and [4,0], should return 50 each
+	//will return 1 and 2, should return 50% each
 	var r0=0;r1=0;
 	for (var i=0;i<1000;i++) {
 
-		var n=maze.getRandomUnvisitedNeighbourOf([3,0]);
-		var coords= n.get("coords");
-		if (coords[0]==3) {
+		var d=maze.getRandomValidUnvisitedDirectionOf([3,0]);
+		if (d==1) {
 			r0++;
 		} else {
 			r1++;
 		}
 	}
-	console.log(r0," vs ",r1);
-	ok(r0>470,"getRandomUnvistedNeighbourOf returns good randomness with "+r0+">470");
-	ok(r0<530,"getRandomUnvistedNeighbourOf returns good randomness with "+r1+"<530");
+	console.log("Randomwness: ",r0," vs ",r1);
+	ok(r0>470,"getRandomValidUnvisitedDirectionOf returns good randomness with "+r0+">470");
+	ok(r0<530,"getRandomValidUnvisitedDirectionOf returns good randomness with "+r1+"<530");
+
+	//set all visited
+	maze.setVisited([3,1]);
+	maze.setVisited([4,0]);
+	n=maze.getRandomValidUnvisitedDirectionOf([3,0]);
+	equal(n,false,"getRandomValidUnvisitedDirectionOf() returns false if all are visited");
 });
 
 test("MazeView",function() {
