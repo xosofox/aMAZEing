@@ -7,6 +7,8 @@
         <h1>aMAZEing</h1>
 
         <div id="mazecontainer">
+            <input type="checkbox" name="watch" id="watch"><label for="watch">Watch how maze is being generated</label>
+            <input type="button" name="start" value="Start" id="start"><br />
             <canvas id="mazeview" width="200" height="200"></canvas>
         </div>
 
@@ -27,6 +29,7 @@
                 maze = new Maze({
                     rows:ROWS,
                     cols:COLS
+                    //stepDelay:0
                 });
                 mazeView = new MazeView({
                     el: '#mazeview',
@@ -40,7 +43,17 @@
                 mazeView.render();
                 maze.setStart([0,0]);
                 maze.setExit([ROWS-1,COLS-1]);
-                maze.digMaze([0,0])
+                //maze.startDigging([0,0]);
+
+                $('#start').click(function() {
+                    if ($('#watch').is(':checked')) {
+                        maze.set("stepDelay",0);
+                    } else {
+                        maze.set("stepDelay",-1);
+                    }
+                    maze.reset();
+                    maze.startDigging([0,0]);
+                });
             });
         </script>
     </body>

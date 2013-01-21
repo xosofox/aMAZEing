@@ -17,7 +17,9 @@ var Maze = Backbone.Model.extend({
 			[1, 0],
 			[0, -1]
 		],
-		"startCoords":[0,0]
+		"startCoords":[0,0],
+        "cellStack":[],
+        "stepDelay":-1
 	},
 	events:{
 		"change rows cols":"reset"
@@ -62,6 +64,10 @@ var Maze = Backbone.Model.extend({
 	setVisited: function(coords) {
 		this.getCell(coords).set("visited",true);
 	},
+    startDigging: function(coords) {
+        this.get("cellStack").push(coords);
+        this.digMaze();
+    },
 	validCoords:function(coords) {
 		if ((coords[0] < 0) || (coords[1] < 0)) {
 			return false;
@@ -150,19 +156,33 @@ var Maze = Backbone.Model.extend({
 			n.get("walls")[this.oppositeDirection(direction)]=false;
 		}
 	},
-	digMaze:function(coords) {
-		var me=this;
-		var c=this.getCell(coords);
-		c.set("visited",true);
-        this.trigger("cell:changed",coords);
-		var d;
-		d=this.getRandomValidUnvisitedDirectionOf(coords);
-		while (d!==false) {
-			this.MrGorbachevTearDownThisWall(coords,d)
-			var newCoords=this.applyDirectionOnCoords(coords,d);
-			me.digMaze(newCoords);
-			d=this.getRandomValidUnvisitedDirectionOf(coords);
-		}
-        this.trigger("cell:changed",coords);
+	digMaze:function() {
+        var me=this;
+        var cs=this.get("cellStack");
+        var l=cs.length;
+        if (l>0) {
+            var coords=cs[l-1];
+            var c=this.getCell(coords);
+            c.set("visited",true);
+            var d;
+            d=this.getRandomValidUnvisitedDirectionOf(coords);
+		    if (d!==false) {
+                this.MrGorbachevTearDownThisWall(coords,d)
+                var newCoords=this.applyDirectionOnCoords(coords,d);
+                cs.push(newCoords);
+            } else {
+                cs.pop();
+            }
+            this.trigger("cell:changed",coords);
+            var sd=this.get("stepDelay");
+            if (sd<0) {
+                me.digMaze();
+            } else {
+                //allows rendering in paralled
+                setTimeout(function(){me.digMaze()},sd);
+            }
+        } else {
+            console.log("I'm done!");
+        }
 	}
 });
