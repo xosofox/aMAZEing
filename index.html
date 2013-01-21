@@ -8,7 +8,7 @@
 
         <div id="mazecontainer">
             <input type="checkbox" name="watch" id="watch"><label for="watch">Watch how maze is being generated</label>
-            <input type="button" name="start" value="Start" id="start"><br />
+            <input type="button" name="start" value="Generate" id="start"><br />
             <canvas id="mazeview" width="200" height="200"></canvas>
         </div>
 
@@ -40,7 +40,6 @@
                     bgColorStyle: "black",
                     fgColorStyle: "pink"
                 });
-                mazeView.render();
                 maze.setStart([0,0]);
                 maze.setExit([ROWS-1,COLS-1]);
                 //maze.startDigging([0,0]);
@@ -52,6 +51,7 @@
                         maze.set("stepDelay",-1);
                     }
                     maze.reset();
+                    mazeView.render();
                     maze.startDigging([0,0]);
                 });
             });
