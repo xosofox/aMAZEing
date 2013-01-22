@@ -17,6 +17,7 @@
             
             <input type="checkbox" name="watch" id="watch"><label for="watch">Watch how maze is being generated</label>
             <input type="button" name="start" value="Generate" id="start"><br />
+            <div id="status">Status: waiting for start</div>
             <canvas id="mazeview" width="200" height="200"></canvas>
         </div>
 
@@ -32,6 +33,7 @@
             var maze;
             var mazeView
             var htmlColors= ["aqua", "black", "blue", "fuchsia", "gray", "green", "lime", "maroon", "navy", "olive", "pink", "purple", "red", "silver", "teal", "white", "yellow"];
+            var watcherInterval;
             $(document).ready(function () {
                 var ROWS=1;
                 var COLS=1;
@@ -57,7 +59,15 @@
                 $('#bgColor').val("black");
                 $('#fgColor').val("pink");
 
+                updateStatus=function() {
+                    var u=maze.get("unvisited");
+                    var cs=maze.get("cellStack");
+                    $('#status').text("Status: "+u+" remaining, Stack "+cs.length);
+                };
+
                 $('#start').click(function() {
+
+                    watcherInterval=setInterval(updateStatus,200);
                     if ($('#watch').is(':checked')) {
                         maze.set("stepDelay",0);
                     } else {
@@ -77,7 +87,6 @@
                         alert("Enter valid number of columns between 1 and 200");
                     }
 
-                    console.log({"ROWS":ROWS, "COLS":COLS});
                     maze.set({"rows":ROWS, "cols":COLS});
                     maze.reset();
                     maze.setStart([0,0]);
@@ -85,6 +94,10 @@
                     mazeView.options.fgColorStyle=$('#fgColor').val();
                     mazeView.options.bgColorStyle=$('#bgColor').val();
                     mazeView.render();
+                    maze.set("readyCallback",function() {
+                        clearInterval(watcherInterval);
+                        $('#status').text("DONE!");
+                    });
                     maze.startDigging([0,0]);
                 });
             });

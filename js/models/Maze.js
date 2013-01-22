@@ -29,9 +29,6 @@ var Maze = Backbone.Model.extend({
 		this.reset();
 		_.bindAll(this,"getCell","getNeighbourOf","applyDirectionOnCoords");
 	},
-	generate:function () {
-
-	},
 	reset:function () {
 		console.log("Resetting to ", this.get("rows"), this.get("cols"));
 		for (var r = 0; r < this.get("rows"); r++) {
@@ -40,6 +37,7 @@ var Maze = Backbone.Model.extend({
 				this.grid[r][c] = new Cell(this, [r, c]);
 			}
 		}
+                this.set("unvisited",r*c);
 	},
 	/**
 	 *
@@ -56,14 +54,23 @@ var Maze = Backbone.Model.extend({
 	setStart:function(coords) {
 		this.set("startCoords",coords);
 		this.getCell(coords).set({"start":true,"visited":true});
+                this.decUnvisited();
 	},
 	setExit:function(coords) {
 		this.set("exitCoords",coords);
 		this.getCell(coords).set({"exit":true});
 	},
 	setVisited: function(coords) {
-		this.getCell(coords).set("visited",true);
+                var c=this.getCell(coords);
+                if (!(c.get("visited"))) {
+                    c.set("visited",true);
+                    this.decUnvisited();
+                }
 	},
+        decUnvisited: function() {
+                this.set("unvisited",this.get("unvisited")-1);
+            },
+
     startDigging: function(coords) {
         this.get("cellStack").push(coords);
         this.digMaze();
@@ -160,10 +167,11 @@ var Maze = Backbone.Model.extend({
         var me=this;
         var cs=this.get("cellStack");
         var l=cs.length;
+        var flush=this.get("flush");
+        var flush_threshold=1000;
         if (l>0) {
             var coords=cs[l-1];
-            var c=this.getCell(coords);
-            c.set("visited",true);
+            maze.setVisited(coords);
             var ds=this.getValidUnvisitedDirectionsOf(coords);
             var d=false;
             if (ds.length>1) {
@@ -185,13 +193,19 @@ var Maze = Backbone.Model.extend({
             }
             this.trigger("cell:changed",coords);
             var sd=this.get("stepDelay");
-            if (sd<0) {
+            if ((sd<0) && (flush<flush_threshold)) {
+                this.set("flush",++flush);
                 me.digMaze();
             } else {
-                //allows rendering in paralled
+                this.set("flush",0);
+                //allows rendering in parallel
                 setTimeout(function(){me.digMaze()},sd);
             }
         } else {
+            var callback=this.get("readyCallback");
+            if (callback && typeof(callback) === "function") {
+                callback();
+            }
             console.log("I'm done!");
         }
 	}
