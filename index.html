@@ -40,9 +40,6 @@
                     bgColorStyle: "black",
                     fgColorStyle: "pink"
                 });
-                maze.setStart([0,0]);
-                maze.setExit([ROWS-1,COLS-1]);
-                //maze.startDigging([0,0]);
 
                 $('#start').click(function() {
                     if ($('#watch').is(':checked')) {
@@ -51,6 +48,8 @@
                         maze.set("stepDelay",-1);
                     }
                     maze.reset();
+                    maze.setStart([0,0]);
+                    maze.setExit([ROWS-1,COLS-1]);
                     mazeView.render();
                     maze.startDigging([0,0]);
                 });
