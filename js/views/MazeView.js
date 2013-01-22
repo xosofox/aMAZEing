@@ -17,15 +17,15 @@ var MazeView = Backbone.View.extend({
 		fgColorStyle: "white"
 	},
 	initialize:function () {
+        this.listenTo(this.model,"cell:changed",this.renderCell);
+	},
+	render:function () {
+		this.ctx = this.el.getContext("2d");
 		this.calcDimensions();
 		this.el.width=this.options.width;
 		this.el.height=this.options.height;
 		this.el.style.width=this.options.width*this.options.zoom+"px";
 		this.el.style.height=this.options.height*this.options.zoom+"px";
-        this.listenTo(this.model,"cell:changed",this.renderCell);
-	},
-	render:function () {
-		this.ctx = this.el.getContext("2d");
 		this.fillBg();
 	},
 	fillBg:function() {

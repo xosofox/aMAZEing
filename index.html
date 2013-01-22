@@ -6,7 +6,15 @@
     <body>
         <h1>aMAZEing</h1>
 
+        <script type="text/javascript">
+            </script>
+
         <div id="mazecontainer">
+            Walls: <select name="bgColor" id="bgColor"></select><br />
+            Background: <select name="fgColor" id="fgColor"></select><br />
+            Columns: <input name="COLS" id="COLS" type="text" size="4" value="20"><br />
+            Rows: <input name="ROWS" id="ROWS" type="text" size="4" value="20"><br />
+            
             <input type="checkbox" name="watch" id="watch"><label for="watch">Watch how maze is being generated</label>
             <input type="button" name="start" value="Generate" id="start"><br />
             <canvas id="mazeview" width="200" height="200"></canvas>
@@ -23,9 +31,10 @@
         <script type="text/javascript">
             var maze;
             var mazeView
+            var htmlColors= ["aqua", "black", "blue", "fuchsia", "gray", "green", "lime", "maroon", "navy", "olive", "pink", "purple", "red", "silver", "teal", "white", "yellow"];
             $(document).ready(function () {
-                var ROWS=40;
-                var COLS=40;
+                var ROWS=1;
+                var COLS=1;
                 maze = new Maze({
                     rows:ROWS,
                     cols:COLS
@@ -41,15 +50,40 @@
                     fgColorStyle: "pink"
                 });
 
+                for (var c=0;c<htmlColors.length;c++) {
+                    $('#fgColor').append('<option style="color: '+htmlColors[c]+'" value="'+htmlColors[c]+'">'+htmlColors[c]+'</option>');
+                    $('#bgColor').append('<option style="color: '+htmlColors[c]+'" value="'+htmlColors[c]+'">'+htmlColors[c]+'</option>');
+                }
+                $('#bgColor').val("black");
+                $('#fgColor').val("pink");
+
                 $('#start').click(function() {
                     if ($('#watch').is(':checked')) {
                         maze.set("stepDelay",0);
                     } else {
                         maze.set("stepDelay",-1);
                     }
+                    ROWS=parseInt($('#ROWS').val());
+                    if ((ROWS>0) && (ROWS<=200)) {
+                        //
+                    } else {
+                        alert("Enter valid number of rows between 1 and 200");
+                    }
+
+                    COLS=parseInt($('#COLS').val());
+                    if ((COLS>0) && (COLS<=200)) {
+                        //
+                    } else {
+                        alert("Enter valid number of columns between 1 and 200");
+                    }
+
+                    console.log({"ROWS":ROWS, "COLS":COLS});
+                    maze.set({"rows":ROWS, "cols":COLS});
                     maze.reset();
                     maze.setStart([0,0]);
                     maze.setExit([ROWS-1,COLS-1]);
+                    mazeView.options.fgColorStyle=$('#fgColor').val();
+                    mazeView.options.bgColorStyle=$('#bgColor').val();
                     mazeView.render();
                     maze.startDigging([0,0]);
                 });
