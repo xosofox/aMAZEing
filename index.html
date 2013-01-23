@@ -75,19 +75,13 @@
                         maze.set("stepDelay",-1);
                     }
                     ROWS=parseInt($('#ROWS').val());
-                    if ((ROWS>0) && (ROWS<=200)) {
-                        //
-                    } else {
-                        alert("Enter valid number of rows between 1 and 200");
-                        return;
-                    }
-
                     COLS=parseInt($('#COLS').val());
-                    if ((COLS>0) && (COLS<=200)) {
-                        //
-                    } else {
-                        alert("Enter valid number of columns between 1 and 200");
-                        return;
+                    if (ROWS<=0) ROWS=1;
+                    if (COLS<=0) COLS=1;
+                    if ((ROWS>=200) || (COLS>=200)) {
+                        if (!(confirm("Large mazes take much longer. Are you sure that you're sure to continue?"))) {
+                            return;
+                        }
                     }
 
                     maze.set({"rows":ROWS, "cols":COLS});
