@@ -28,7 +28,7 @@ var Maze = Backbone.Model.extend({
 	initialize:function () {
 		this.grid = [];
 		this.reset();
-		_.bindAll(this,"getCell","getNeighbourOf","applyDirectionOnCoords");
+		_.bindAll(this,"getCell","applyDirectionOnCoords");
 	},
 	reset:function () {
         var me=this;
@@ -114,27 +114,9 @@ var Maze = Backbone.Model.extend({
 			return false;
 		}
 	},
-	getNeighbourOf:function (coords, direction) {
+	getCellInDirection:function (coords, direction) {
 		var newCoords = this.applyDirectionOnCoords(coords, direction);
 		return this.getCell(newCoords);
-	},
-	/**
-	 *
-	 * Returns all valid neighbours of cell
-	 * @param coords
-	 * @return {Cells}
-	 */
-	getNeighboursOf: function(coords) {
-		console.error("Obsolete");
-		var ns=[];
-		for (var d in this.get("directions")) {
-			var newCoords = this.applyDirectionOnCoords(coords,d);
-			var c=this.getCell(newCoords);
-			if (c) {
-				ns[d]=c;
-			}
-		}
-		return new Cells(ns);
 	},
 	getValidDirectionsOf: function(coords) {
 		var nb=this.get("nbOfNeighbours");
@@ -177,7 +159,7 @@ var Maze = Backbone.Model.extend({
 		if (c) {
 			c.walls[direction]=false;
 		}
-		var n=this.getNeighbourOf(coords,direction);
+		var n=this.getCellInDirection(coords,direction);
 		if (n) {
 			n.walls[this.oppositeDirection(direction)]=false;
 		}
