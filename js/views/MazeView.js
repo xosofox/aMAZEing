@@ -17,6 +17,7 @@ var MazeView = Backbone.View.extend({
 		fgColorStyle: "white"
 	},
 	initialize:function () {
+        this.options.numNeigh=this.model.get("nbOfNeighbours");
         this.listenTo(this.model,"cell:changed",this.renderCell);
 	},
 	render:function () {
@@ -38,14 +39,14 @@ var MazeView = Backbone.View.extend({
 	renderCell:function(coords) {
 		var c = this.model.getCell(coords);
 		if (c) {
-			if (c.get("visited")) {
+			if (c.visited) {
 				//draw bg
 				this.renderCellVisited(coords);
 
 				//draw all walls
-				var walls= c.get("walls");
-				for (var w=0;w<walls.length;w++) {
-					if (walls[w]) {
+				var walls= c.walls;
+				for (var w=0;w<this.options.numNeigh;w++) {
+					if (typeof walls[w] === "undefined") {
 						this.renderWall(coords,w);
 					}
 				}
@@ -55,10 +56,10 @@ var MazeView = Backbone.View.extend({
 	renderCellVisited:function(coords) {
 		this.ctx.fillStyle = this.options.fgColorStyle;
 		var c=this.model.getCell(coords);
-		if (c.get("start")) {
+		if (c.start) {
 			this.ctx.fillStyle="red";
 		}
-		if (c.get("exit")) {
+		if (c.exit) {
 			this.ctx.fillStyle="green";
 		}
 

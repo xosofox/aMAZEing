@@ -58,17 +58,18 @@ var Maze = Backbone.Model.extend({
 	},
 	setStart:function(coords) {
 		this.set("startCoords",coords);
-		this.getCell(coords).set({"start":true,"visited":true});
+		this.getCell(coords).start=true;
+		this.getCell(coords).visited=true;
                 this.decUnvisited();
 	},
 	setExit:function(coords) {
 		this.set("exitCoords",coords);
-		this.getCell(coords).set({"exit":true});
+		this.getCell(coords).exit=true;
 	},
 	setVisited: function(coords) {
                 var c=this.getCell(coords);
-                if (!(c.get("visited"))) {
-                    c.set("visited",true);
+                if (!(c.visited)) {
+                    c.visited=true;
                     this.decUnvisited();
                 }
 	},
@@ -99,7 +100,14 @@ var Maze = Backbone.Model.extend({
             var r=coords[0];
             var c=coords[1];
             if (this.grid[r][c]===false) {
-                this.grid[r][c]=new Cell(this, [r, c]);
+                //cell prototype
+                this.grid[r][c]={
+                    visited: false,
+                    walls: [],
+                    coords: [],
+                    start: false,
+                    exit: false
+                }
             }
 			return this.grid[r][c];
 		} else {
@@ -145,7 +153,7 @@ var Maze = Backbone.Model.extend({
 			var d=ds[i];
 			var c=this.getCell(this.applyDirectionOnCoords(coords,d));
 			if (c) {
-				if (!(c.get("visited"))) {
+				if (!(c.visited)) {
 					us.push(parseInt(d));
 				}
 			}
@@ -167,11 +175,11 @@ var Maze = Backbone.Model.extend({
 	MrGorbachevTearDownThisWall:function(coords,direction) {
 		var c=this.getCell(coords);
 		if (c) {
-			c.get("walls")[direction]=false;
+			c.walls[direction]=false;
 		}
 		var n=this.getNeighbourOf(coords,direction);
 		if (n) {
-			n.get("walls")[this.oppositeDirection(direction)]=false;
+			n.walls[this.oppositeDirection(direction)]=false;
 		}
 	},
 	digMaze:function() {
