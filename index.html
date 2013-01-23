@@ -60,9 +60,10 @@
                 $('#fgColor').val("pink");
 
                 updateStatus=function() {
+                    var s=maze.get("status");
                     var u=maze.get("unvisited");
                     var cs=maze.get("cellStack");
-                    $('#status').text("Status: "+u+" remaining, Stack "+cs.length);
+                    $('#status').text("Status: "+s+", "+u+" remaining, Stack "+cs.length);
                 };
 
                 $('#start').click(function() {
@@ -78,6 +79,7 @@
                         //
                     } else {
                         alert("Enter valid number of rows between 1 and 200");
+                        return;
                     }
 
                     COLS=parseInt($('#COLS').val());
@@ -85,6 +87,7 @@
                         //
                     } else {
                         alert("Enter valid number of columns between 1 and 200");
+                        return;
                     }
 
                     maze.set({"rows":ROWS, "cols":COLS});

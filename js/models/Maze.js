@@ -19,7 +19,8 @@ var Maze = Backbone.Model.extend({
 		],
 		"startCoords":[0,0],
         "cellStack":[],
-        "stepDelay":-1
+        "stepDelay":-1,
+        "status": ""
 	},
 	events:{
 		"change rows cols":"reset"
@@ -30,14 +31,18 @@ var Maze = Backbone.Model.extend({
 		_.bindAll(this,"getCell","getNeighbourOf","applyDirectionOnCoords");
 	},
 	reset:function () {
+        var me=this;
 		console.log("Resetting to ", this.get("rows"), this.get("cols"));
 		for (var r = 0; r < this.get("rows"); r++) {
 			this.grid[r] = [];
+            this.set("status","Resetting Cells in row "+(r+1));
 			for (var c = 0; c < this.get("cols"); c++) {
-				this.grid[r][c] = new Cell(this, [r, c]);
+				this.grid[r][c] = false; //new Cell(this, [r, c]);
 			}
 		}
                 this.set("unvisited",r*c);
+            this.set("status","");
+
 	},
 	/**
 	 *
@@ -72,6 +77,7 @@ var Maze = Backbone.Model.extend({
             },
 
     startDigging: function(coords) {
+        this.set("status","digging");
         this.get("cellStack").push(coords);
         this.digMaze();
     },
@@ -90,7 +96,12 @@ var Maze = Backbone.Model.extend({
 	},
 	getCell:function (coords) {
 		if (this.validCoords(coords)) {
-			return this.grid[coords[0]][coords[1]];
+            var r=coords[0];
+            var c=coords[1];
+            if (this.grid[r][c]===false) {
+                this.grid[r][c]=new Cell(this, [r, c]);
+            }
+			return this.grid[r][c];
 		} else {
 			return false;
 		}
@@ -207,6 +218,7 @@ var Maze = Backbone.Model.extend({
                 callback();
             }
             console.log("I'm done!");
+            this.set("status","");
         }
 	}
 });
