@@ -56,19 +56,23 @@ var MazeView = Backbone.View.extend({
 	renderCellVisited:function(coords) {
 		this.ctx.fillStyle = this.options.fgColorStyle;
 		var c=this.model.getCell(coords);
+
+        if (c.solution) {
+			this.ctx.fillStyle="yellow";
+        }
+
 		if (c.start) {
 			this.ctx.fillStyle="red";
 		}
+
 		if (c.exit) {
 			this.ctx.fillStyle="green";
 		}
 
 		var top=this.rowToY(coords[0]);
 		var left=this.colToX(coords[1]);
-		//this.ctx.moveTo(left,top);
-		//this.ctx.beginPath();
 		this.ctx.fillRect(left,top, this.options.size,this.options.size);
-		//this.ctx.fill();
+
 	},
 	renderWall:function(coords,wall) {
 		var top=this.rowToY(coords[0]);

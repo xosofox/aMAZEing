@@ -128,4 +128,24 @@ test("Algorithms",function() {
 	maze.MrGorbachevTearDownThisWall([1,1],1);
 	equal(maze.getCell([1,1]).walls[1],false,"the wall in the east has been taken down");
 	equal(maze.getCell([1,2]).walls[3],false,"the wall in the west has been taken down");
-})
+});
+
+test("Maze solver", function () {
+	var maze = new Maze({rows:8,cols:8});
+    var c;
+    c=maze.getCell([7,7]);
+    maze.setExit([7,7]);
+    c=maze.getCell([3,3]);
+    maze.grid[3][3].walls=[false,false,undefined,true];
+    deepEqual(maze.getAccessibleDirectionsOf([3,3]),[0,1],"getAccessibleDirectionsOf checks walls");
+
+
+    var c=maze.getCell([0,0]);
+    maze.grid[0][0].walls=[undefined,false,undefined,undefined];
+    deepEqual(maze.getUnknownAccessibleDirectionsOf([0,0]),[1],"getUnknownAccessibleDirectionsOf");
+    maze.grid[0][1].solution=false;
+    deepEqual(maze.getUnknownAccessibleDirectionsOf([0,0]),[],"getUnknownAccessibleDirectionsOf");
+    maze.grid[0][1].solution=false;
+    deepEqual(maze.getUnknownAccessibleDirectionsOf([0,0]),[],"getUnknownAccessibleDirectionsOf");
+
+});

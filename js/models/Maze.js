@@ -20,7 +20,8 @@ var Maze = Backbone.Model.extend({
 		"startCoords":[0,0],
         "cellStack":[],
         "stepDelay":-1,
-        "status": ""
+        "status": "",
+        "flush_threshold": 10000
 	},
 	events:{
 		"change rows cols":"reset"
@@ -32,7 +33,6 @@ var Maze = Backbone.Model.extend({
 	},
 	reset:function () {
         var me=this;
-		console.log("Resetting to ", this.get("rows"), this.get("cols"));
 		for (var r = 0; r < this.get("rows"); r++) {
 			this.grid[r] = [];
             this.set("status","Resetting Cells in row "+(r+1));
@@ -79,8 +79,13 @@ var Maze = Backbone.Model.extend({
 
     startDigging: function(coords) {
         this.set("status","digging");
-        this.get("cellStack").push(coords);
+        this.set("cellStack",[coords]);
         this.digMaze();
+    },
+    startSolving: function(coords) {
+        this.set("status","solving");
+        this.set("cellStack",[coords]);
+        this.solveMaze();
     },
 	validCoords:function(coords) {
 		if ((coords[0] < 0) || (coords[1] < 0)) {
@@ -164,15 +169,43 @@ var Maze = Backbone.Model.extend({
 			n.walls[this.oppositeDirection(direction)]=false;
 		}
 	},
+    getAccessibleDirectionsOf:function(coords) {
+        var c = this.getCell(coords);
+
+        var ds=[];
+        if (c) {
+            var walls= c.walls;
+            for (var w=0;w<this.get("nbOfNeighbours");w++) {
+                if (c.walls[w] === false) {
+                    ds.push(w);
+                }
+            }
+        }
+        return ds;
+    },
+    getUnknownAccessibleDirectionsOf:function(coords) {
+        var us=[];
+        var ds=this.getAccessibleDirectionsOf(coords);
+		for (var i=0;i<ds.length;i++) {
+			var d=ds[i];
+			var c=this.getCell(this.applyDirectionOnCoords(coords,d));
+			if (c) {
+				if (typeof c.solution === "undefined" ) {
+					us.push(parseInt(d));
+				}
+			}
+		}
+        return us;
+    },
 	digMaze:function() {
         var me=this;
         var cs=this.get("cellStack");
         var l=cs.length;
         var flush=this.get("flush");
-        var flush_threshold=1000;
+        var flush_threshold=this.get("flush_threshold");
         if (l>0) {
             var coords=cs[l-1];
-            maze.setVisited(coords);
+            this.setVisited(coords);
             var ds=this.getValidUnvisitedDirectionsOf(coords);
             var d=false;
             if (ds.length>1) {
@@ -210,5 +243,53 @@ var Maze = Backbone.Model.extend({
             console.log("I'm done!");
             this.set("status","");
         }
-	}
+	},
+	solveMaze:function() {
+        var me=this;
+        var cs=this.get("cellStack");
+        var l=cs.length;
+        var flush=this.get("flush");
+        var flush_threshold=this.get("flush_threshold");
+        if (l>0) {
+            var coords=cs[l-1];
+            var c=this.getCell(coords);
+            c.solution=true;
+
+            if (c.exit) {
+                this.set("cellStack",[]);
+                setTimeout(function(){me.solveMaze()},0);
+                return true;
+            }
+
+            var ds=this.getUnknownAccessibleDirectionsOf(coords);
+            if (ds.length>0) {
+                for (var d=0;d<ds.length;d++) {
+                    var newCoords=this.applyDirectionOnCoords(coords,ds[d]);
+                    cs.push(newCoords);
+                }
+            } else {
+                c.solution=false;
+                //remove myself, I'm done now, no need to stay on stack
+                cs.pop();
+            }
+            this.trigger("cell:changed",coords);
+            var sd=this.get("stepDelay");
+            if ((sd<0) && (flush<flush_threshold)) {
+                this.set("flush",++flush);
+                me.solveMaze();
+            } else {
+                this.set("flush",0);
+                //allows rendering in parallel
+                setTimeout(function(){me.solveMaze()},sd);
+            }
+        } else {
+            var callback=this.get("readyCallback");
+            if (callback && typeof(callback) === "function") {
+                callback();
+            }
+            console.log("I'm done solving!");
+            this.set("status","");
+        }
+
+    }
 });

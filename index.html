@@ -12,11 +12,12 @@
         <div id="mazecontainer">
             Walls: <select name="bgColor" id="bgColor"></select><br />
             Background: <select name="fgColor" id="fgColor"></select><br />
-            Columns: <input name="COLS" id="COLS" type="text" size="4" value="20"><br />
-            Rows: <input name="ROWS" id="ROWS" type="text" size="4" value="20"><br />
+            Columns: <input name="COLS" id="COLS" type="text" size="4" value="180"><br />
+            Rows: <input name="ROWS" id="ROWS" type="text" size="4" value="60"><br />
             
-            <input type="checkbox" name="watch" id="watch"><label for="watch">Watch how maze is being generated</label>
-            <input type="button" name="start" value="Generate" id="start"><br />
+            <input type="checkbox" name="watch" id="watch"><label for="watch">Watch each step of generation or solving</label><br />
+            <input type="button" name="generate" value="Generate" id="generate"><br />
+            <input type="button" name="solve" value="Solve" id="solve"><br />
             <div id="status">Status: waiting for start</div>
             <canvas id="mazeview" width="200" height="200"></canvas>
         </div>
@@ -56,7 +57,7 @@
                     $('#bgColor').append('<option style="color: '+htmlColors[c]+'" value="'+htmlColors[c]+'">'+htmlColors[c]+'</option>');
                 }
                 $('#bgColor').val("black");
-                $('#fgColor').val("pink");
+                $('#fgColor').val("white");
 
                 updateStatus=function() {
                     var s=maze.get("status");
@@ -65,7 +66,7 @@
                     $('#status').text("Status: "+s+", "+u+" remaining, Stack "+cs.length);
                 };
 
-                $('#start').click(function() {
+                $('#generate').click(function() {
 
                     watcherInterval=setInterval(updateStatus,200);
                     if ($('#watch').is(':checked')) {
@@ -95,6 +96,20 @@
                         $('#status').text("DONE!");
                     });
                     maze.startDigging([0,0]);
+                });
+                $('#solve').click(function() {
+
+                    watcherInterval=setInterval(updateStatus,200);
+                    if ($('#watch').is(':checked')) {
+                        maze.set("stepDelay",0);
+                    } else {
+                        maze.set("stepDelay",-1);
+                    }
+                    maze.set("readyCallback",function() {
+                        clearInterval(watcherInterval);
+                        $('#status').text("DONE!");
+                    });
+                    maze.startSolving([0,0]);
                 });
             });
         </script>
