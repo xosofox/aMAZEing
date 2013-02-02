@@ -2,14 +2,20 @@
 <html>
     <head>
         <title>aMAZEing</title>
+	<style type="text/css">
+		@media print
+		{
+			.noprint
+			{
+				display: none;
+			}
+		}
+	</style>
     </head>
     <body>
         <h1>aMAZEing</h1>
 
-        <script type="text/javascript">
-            </script>
-
-        <div id="mazecontainer">
+        <div id="mazecontainer" class="noprint">
             Walls: <select name="bgColor" id="bgColor"></select><br />
             Background: <select name="fgColor" id="fgColor"></select><br />
             Columns: <input name="COLS" id="COLS" type="text" size="4" value="180"><br />
@@ -19,8 +25,10 @@
             <input type="button" name="generate" value="Generate" id="generate"><br />
             <input type="button" name="solve" value="Solve" id="solve"><br />
             <div id="status">Status: waiting for start</div>
-            <canvas id="mazeview" width="200" height="200"></canvas>
         </div>
+        <img src="images/Katze.jpg" width="160" style="vertical-align: top" />
+        <canvas id="mazeview" width="200" height="200"></canvas>
+        <img src="images/Maus.jpg" width="160" style="vertical-align: bottom" />
 
         <script type="text/javascript" src="js/lib/jquery.min.js"></script>
         <script type="text/javascript" src="js/lib/underscore-min.js"></script>
@@ -32,7 +40,7 @@
         <script type="text/javascript">
             var maze;
             var mazeView
-            var htmlColors= ["aqua", "black", "blue", "fuchsia", "gray", "green", "lime", "maroon", "navy", "olive", "pink", "purple", "red", "silver", "teal", "white", "yellow"];
+            var htmlColors= ["aqua", "black", "blue", "fuchsia", "gray", "green", "lime", "maroon", "navy", "olive", "pink", "purple", "red", "silver", "teal", "white", "gold", "yellow"];
             var watcherInterval;
             $(document).ready(function () {
                 var ROWS=1;
